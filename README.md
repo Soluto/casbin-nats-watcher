@@ -19,14 +19,14 @@ import (
 )
 
 func main() {
-	watcher, _ := natswatcher.NewWatcher("http://...", "my-policy-subject")
+	watcher, _ := natswatcher.NewWatcher("http://nats-endpoint", "my-policy-subject")
 
 	enforcerer := casbin.NewSyncedEnforcer("model.conf", "policy.csv")
 	enforcerer.SetWatcher(watcher)
 }
 ```
 
-## Connected pojects
+## Related pojects
 - [Casbin](https://github.com/casbin/casbin)
 - [Nats.io](https://github.com/nats-io/go-nats)
 
