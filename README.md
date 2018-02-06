@@ -21,7 +21,7 @@ import (
 func main() {
 	watcher, _ := natswatcher.NewWatcher("http://...", "my-policy-subject")
 
-	enforcerer := casbin.NewSyncedEnforcer("", "")
+	enforcerer := casbin.NewSyncedEnforcer("model.conf", "policy.csv")
 	enforcerer.SetWatcher(watcher)
 }
 ```
