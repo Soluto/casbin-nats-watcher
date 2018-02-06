@@ -25,7 +25,7 @@ func TestWatcher(t *testing.T) {
 	// Use the endpoint of nats as parameter.
 	updater, err := NewWatcher(natsEndpoint, natsSubject)
 	if err != nil {
-		t.Error("Failed to create updater")
+		t.Fatal("Failed to create updater")
 	}
 	updater.SetUpdateCallback(func(msg string) {
 		updaterCh <- "updater"
@@ -34,7 +34,7 @@ func TestWatcher(t *testing.T) {
 	// listener represents any other Casbin enforcer instance that watches the change of policy in DB.
 	listener, err := NewWatcher(natsEndpoint, natsSubject)
 	if err != nil {
-		t.Error("Failed to create listener")
+		t.Fatal("Failed to create listener")
 	}
 
 	// listener should set a callback that gets called when policy changes.
@@ -42,13 +42,13 @@ func TestWatcher(t *testing.T) {
 		listenerCh <- "listener"
 	})
 	if err != nil {
-		t.Error("Failed to set listener callback")
+		t.Fatal("Failed to set listener callback")
 	}
 
 	// updater changes the policy, and sends the notifications.
 	err = updater.Update()
 	if err != nil {
-		t.Error("The updater failed to send Update")
+		t.Fatal("The updater failed to send Update")
 	}
 
 	// Validate that listener received message
@@ -58,18 +58,18 @@ func TestWatcher(t *testing.T) {
 		select {
 		case res := <-listenerCh:
 			if res != "listener" {
-				t.Errorf("Message from unknown source: %v", res)
+				t.Fatalf("Message from unknown source: %v", res)
 				break
 			}
 			listenerReceived = true
 		case res := <-updaterCh:
 			if res != "updater" {
-				t.Errorf("Message from unknown source: %v", res)
+				t.Fatalf("Message from unknown source: %v", res)
 				break
 			}
 			updaterReceived = true
 		case <-time.After(time.Second * 10):
-			t.Error("Updater or listener didn't received message in time")
+			t.Fatal("Updater or listener didn't received message in time")
 			break
 		}
 		if updaterReceived && listenerReceived {
@@ -94,7 +94,7 @@ func TestWithEnforcer(t *testing.T) {
 	// Use the endpoint of etcd cluster as parameter.
 	w, err := NewWatcher(natsEndpoint, natsSubject)
 	if err != nil {
-		t.Error("Failed to create updater")
+		t.Fatal("Failed to create updater")
 	}
 
 	// Initialize the enforcer.
@@ -117,9 +117,9 @@ func TestWithEnforcer(t *testing.T) {
 	select {
 	case res := <-cannel:
 		if res != "enforcerer" {
-			t.Error("Got unexpected message")
+			t.Fatalf("Got unexpected message :%v", res)
 		}
 	case <-time.After(time.Second * 10):
-		t.Error("The enforcerer didn't send message in time")
+		t.Fatal("The enforcerer didn't send message in time")
 	}
 }
