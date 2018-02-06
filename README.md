@@ -9,7 +9,7 @@
 
 ## Installation
 
-go get github.com/Soluto/casbin-nats-watcher
+    go get github.com/Soluto/casbin-nats-watcher
 
 ## Usage
 ```go
@@ -33,7 +33,7 @@ func main() {
 
 ## Additional Usage Examples
 
-For real-world example visit [Tweek](https://github.com/Soluto/tweek)
+For real-world example visit [Tweek](https://github.com/Soluto/tweek).
 
 ## License
 
