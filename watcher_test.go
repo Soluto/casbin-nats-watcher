@@ -30,7 +30,6 @@ func TestWatcher(t *testing.T) {
 	updater.SetUpdateCallback(func(msg string) {
 		go func() {
 			updaterCh <- "updater"
-			close(updaterCh)
 		}()
 	})
 
@@ -44,7 +43,6 @@ func TestWatcher(t *testing.T) {
 	err = listener.SetUpdateCallback(func(msg string) {
 		go func() {
 			listenerCh <- "listener"
-			close(listenerCh)
 		}()
 	})
 	if err != nil {
@@ -58,19 +56,28 @@ func TestWatcher(t *testing.T) {
 	}
 
 	// Validate that listener received message
-	select {
-	case res := <-listenerCh:
-		if res != "listener" {
-			t.Errorf("Message from unknown source: %v", res)
+	var updaterReceived bool
+	var listenerReceived bool
+	for {
+		select {
+		case res := <-listenerCh:
+			if res != "listener" {
+				t.Errorf("Message from unknown source: %v", res)
+			}
+			listenerReceived = true
+		case res := <-updaterCh:
+			if res != "updater" {
+				t.Errorf("Message from unknown source: %v", res)
+			}
+			updaterReceived = true
+		case <-time.After(time.Second * 10):
+			t.Error("Updater or listener didn't received message in time")
 		}
-	case res := <-updaterCh:
-		if res != "updater" {
-			t.Errorf("Message from unknown source: %v", res)
+		if updaterReceived && listenerReceived {
+			close(listenerCh)
+			close(updaterCh)
+			break
 		}
-	case <-time.After(time.Second * 10):
-		close(updaterCh)
-		close(listenerCh)
-		t.Error("Updater or listener didn't received message in time")
 	}
 
 }
