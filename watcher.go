@@ -9,12 +9,12 @@ import (
 
 // Watcher implements persist.Watcher interface
 type Watcher struct {
-	endpoint                     string
-	connection                   *nats.Conn
-	subscription                 *nats.Subscription
-	policyUpdatedSubject         string
-	policyUpdatedByCasbinSubject string
-	callback                     func(string)
+	endpoint             string
+	options              []nats.Option
+	connection           *nats.Conn
+	subscription         *nats.Subscription
+	policyUpdatedSubject string
+	callback             func(string)
 }
 
 // NewWatcher creates new Nats watcher.
@@ -23,13 +23,13 @@ type Watcher struct {
 //		Endpoint of Nats server
 // - policyUpdatedSubject
 //      Nats subject that sends message when policy was updated externally. It leads to call of callback
-// - policyUpdatedByCasbinSubject
-//      Nats subject that sends message when policy was updated by casbin. (like SavePolicy, AddPolicy, RemovePolicy)
-func NewWatcher(endpoint string, policyUpdatedSubject string, policyUpdatedByCasbinSubject string) (persist.Watcher, error) {
+// - options
+//      Options to connect Nats like user, password, etc.
+func NewWatcher(endpoint string, policyUpdatedSubject string, options ...nats.Option) (persist.Watcher, error) {
 	nw := &Watcher{
-		endpoint:                     endpoint,
-		policyUpdatedSubject:         policyUpdatedSubject,
-		policyUpdatedByCasbinSubject: policyUpdatedByCasbinSubject,
+		endpoint:             endpoint,
+		options:              options,
+		policyUpdatedSubject: policyUpdatedSubject,
 	}
 
 	// Connecting to Nats
@@ -45,7 +45,7 @@ func NewWatcher(endpoint string, policyUpdatedSubject string, policyUpdatedByCas
 	}
 	nw.subscription = sub
 
-	runtime.SetFinalizer(nw, nw.unsubscribe)
+	runtime.SetFinalizer(nw, finilizer)
 
 	return nw, nil
 }
@@ -62,12 +62,12 @@ func (w *Watcher) SetUpdateCallback(callback func(string)) error {
 // It is usually called after changing the policy in DB, like Enforcer.SavePolicy(),
 // Enforcer.AddPolicy(), Enforcer.RemovePolicy(), etc.
 func (w *Watcher) Update() error {
-	w.connection.Publish(w.policyUpdatedByCasbinSubject, []byte(""))
+	w.connection.Publish(w.policyUpdatedSubject, []byte(""))
 	return nil
 }
 
 func (w *Watcher) connect() error {
-	nc, err := nats.Connect(w.endpoint)
+	nc, err := nats.Connect(w.endpoint, w.options...)
 	if err != nil {
 		return err
 	}
@@ -87,6 +87,9 @@ func (w *Watcher) subcribeToUpdates() (*nats.Subscription, error) {
 	return sub, nil
 }
 
-func (w *Watcher) unsubscribe() error {
-	return w.subscription.Unsubscribe()
+func finilizer(w *Watcher) {
+	if w.subscription != nil && w.subscription.IsValid() {
+		w.subscription.Unsubscribe()
+	}
+	return
 }
