@@ -28,9 +28,7 @@ func TestWatcher(t *testing.T) {
 		t.Error("Failed to create updater")
 	}
 	updater.SetUpdateCallback(func(msg string) {
-		go func() {
-			updaterCh <- "updater"
-		}()
+		updaterCh <- "updater"
 	})
 
 	// listener represents any other Casbin enforcer instance that watches the change of policy in DB.
@@ -41,9 +39,7 @@ func TestWatcher(t *testing.T) {
 
 	// listener should set a callback that gets called when policy changes.
 	err = listener.SetUpdateCallback(func(msg string) {
-		go func() {
-			listenerCh <- "listener"
-		}()
+		listenerCh <- "listener"
 	})
 	if err != nil {
 		t.Error("Failed to set listener callback")
@@ -63,15 +59,18 @@ func TestWatcher(t *testing.T) {
 		case res := <-listenerCh:
 			if res != "listener" {
 				t.Errorf("Message from unknown source: %v", res)
+				break
 			}
 			listenerReceived = true
 		case res := <-updaterCh:
 			if res != "updater" {
 				t.Errorf("Message from unknown source: %v", res)
+				break
 			}
 			updaterReceived = true
 		case <-time.After(time.Second * 10):
 			t.Error("Updater or listener didn't received message in time")
+			break
 		}
 		if updaterReceived && listenerReceived {
 			close(listenerCh)
