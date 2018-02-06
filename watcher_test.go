@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/AleF83/casbin"
+	"github.com/casbin/casbin"
 	gnatsd "github.com/nats-io/gnatsd/test"
 	"github.com/nats-io/go-nats"
 )
