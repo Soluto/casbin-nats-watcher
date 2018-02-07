@@ -107,7 +107,7 @@ func TestWithEnforcer(t *testing.T) {
 	// enforcer's LoadPolicy() in the SetWatcher() call.
 	// We can change it by explicitly setting a callback.
 	w.SetUpdateCallback(func(msg string) {
-		cannel <- "enforcerer"
+		cannel <- "enforcer"
 	})
 
 	// Update the policy to test the effect.
@@ -116,10 +116,10 @@ func TestWithEnforcer(t *testing.T) {
 	// Validate that listener received message
 	select {
 	case res := <-cannel:
-		if res != "enforcerer" {
+		if res != "enforcer" {
 			t.Fatalf("Got unexpected message :%v", res)
 		}
 	case <-time.After(time.Second * 10):
-		t.Fatal("The enforcerer didn't send message in time")
+		t.Fatal("The enforcer didn't send message in time")
 	}
 }
