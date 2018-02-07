@@ -1,6 +1,7 @@
 # casbin-nats-watcher
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Report Card](https://goreportcard.com/badge/github.com/Soluto/casbin-nats-watcher)](https://goreportcard.com/report/github.com/Soluto/casbin-nats-watcher)
 [![Build Status](https://travis-ci.org/Soluto/casbin-nats-watcher.svg?branch=master)](https://travis-ci.org/Soluto/casbin-nats-watcher)
 [![Coverage Status](https://coveralls.io/repos/github/Soluto/casbin-nats-watcher/badge.svg?branch=master)](https://coveralls.io/github/Soluto/casbin-nats-watcher?branch=master)
 [![Godoc](https://godoc.org/github.com/Soluto/casbin-nats-watcher?status.svg)](https://godoc.org/github.com/Soluto/casbin-nats-watcher)
