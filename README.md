@@ -13,17 +13,18 @@
     go get github.com/Soluto/casbin-nats-watcher
 
 ## Usage
+
 ```go
 import (
-	natswatcher "github.com/Soluto/casbin-nats-watcher"
-	"github.com/casbin/casbin"
+    natswatcher "github.com/Soluto/casbin-nats-watcher"
+    "github.com/casbin/casbin"
 )
 
 func main() {
-	watcher, _ := natswatcher.NewWatcher("http://nats-endpoint", "my-policy-subject")
+    watcher, _ := natswatcher.NewWatcher("http://nats-endpoint", "my-policy-subject")
 
-	enforcerer := casbin.NewSyncedEnforcer("model.conf", "policy.csv")
-	enforcerer.SetWatcher(watcher)
+    enforcer := casbin.NewSyncedEnforcer("model.conf", "policy.csv")
+    enforcer.SetWatcher(watcher)
 }
 ```
 

@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	watcher, _ := natswatcher.NewWatcher("http://...", "my-policy-subject")
+	watcher, _ := natswatcher.NewWatcher("http://nats-endpoint", "my-policy-subject")
 
-	enforcerer := casbin.NewSyncedEnforcer("rbac_model.conf", "rbac_policy.csv")
-	enforcerer.SetWatcher(watcher)
+	enforcer := casbin.NewSyncedEnforcer("rbac_model.conf", "rbac_policy.csv")
+	enforcer.SetWatcher(watcher)
 }
