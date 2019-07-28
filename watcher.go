@@ -98,5 +98,7 @@ func finalizer(w *Watcher) {
 	if w.subscription != nil && w.subscription.IsValid() {
 		w.subscription.Unsubscribe()
 	}
+	w.subscription = nil
+	w.callback = nil
 	return
 }

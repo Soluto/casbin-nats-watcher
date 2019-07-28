@@ -27,6 +27,7 @@ func TestWatcher(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to create updater")
 	}
+	defer updater.Close()
 	updater.SetUpdateCallback(func(msg string) {
 		updaterCh <- "updater"
 	})
@@ -78,7 +79,6 @@ func TestWatcher(t *testing.T) {
 			break
 		}
 	}
-
 }
 
 func TestWithEnforcer(t *testing.T) {
@@ -96,6 +96,7 @@ func TestWithEnforcer(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to create updater")
 	}
+	defer w.Close()
 
 	// Initialize the enforcer.
 	e := casbin.NewEnforcer("examples/rbac_model.conf", "examples/rbac_policy.csv")
@@ -122,4 +123,5 @@ func TestWithEnforcer(t *testing.T) {
 	case <-time.After(time.Second * 10):
 		t.Fatal("The enforcer didn't send message in time")
 	}
+	close(cannel)
 }
