@@ -1,6 +1,7 @@
 package natswatcher
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/casbin/casbin/persist"
@@ -45,7 +46,7 @@ func NewWatcher(endpoint string, policyUpdatedSubject string, options ...nats.Op
 	}
 	nw.subscription = sub
 
-	runtime.SetFinalizer(nw, finilizer)
+	runtime.SetFinalizer(nw, finalizer)
 
 	return nw, nil
 }
@@ -62,8 +63,11 @@ func (w *Watcher) SetUpdateCallback(callback func(string)) error {
 // It is usually called after changing the policy in DB, like Enforcer.SavePolicy(),
 // Enforcer.AddPolicy(), Enforcer.RemovePolicy(), etc.
 func (w *Watcher) Update() error {
-	w.connection.Publish(w.policyUpdatedSubject, []byte(""))
-	return nil
+	if w.connection != nil && w.connection.Status() == nats.CONNECTED {
+		w.connection.Publish(w.policyUpdatedSubject, []byte(""))
+		return nil
+	}
+	return fmt.Errorf("Connection is nil or in invalid state")
 }
 
 func (w *Watcher) connect() error {
@@ -73,6 +77,11 @@ func (w *Watcher) connect() error {
 	}
 	w.connection = nc
 	return nil
+}
+
+// Close stops and releases the watcher, the callback function will not be called any more.
+func (w *Watcher) Close() {
+	finalizer(w)
 }
 
 func (w *Watcher) subcribeToUpdates() (*nats.Subscription, error) {
@@ -87,9 +96,17 @@ func (w *Watcher) subcribeToUpdates() (*nats.Subscription, error) {
 	return sub, nil
 }
 
-func finilizer(w *Watcher) {
+func finalizer(w *Watcher) {
 	if w.subscription != nil && w.subscription.IsValid() {
 		w.subscription.Unsubscribe()
 	}
+	w.subscription = nil
+
+	if w.connection != nil && !w.connection.IsClosed() {
+		w.connection.Close()
+	}
+	w.connection = nil
+
+	w.callback = nil
 	return
 }
