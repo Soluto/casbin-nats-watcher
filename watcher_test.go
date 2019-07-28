@@ -125,3 +125,26 @@ func TestWithEnforcer(t *testing.T) {
 	}
 	close(cannel)
 }
+
+func TestClose(t *testing.T) {
+	// Setup nats server
+	s := gnatsd.RunDefaultServer()
+	defer s.Shutdown()
+
+	natsEndpoint := fmt.Sprintf("nats://localhost:%d", nats.DefaultPort)
+	natsSubject := "casbin-policy-updated-subject"
+
+	// updater represents the Casbin enforcer instance that changes the policy in DB.
+	// Use the endpoint of nats as parameter.
+	updater, err := NewWatcher(natsEndpoint, natsSubject)
+	if err != nil {
+		t.Fatal("Failed to create updater")
+	}
+
+	updater.Close()
+
+	err = updater.Update()
+	if err == nil {
+		t.Fatal("Closed watcher should return error on update")
+	}
+}
