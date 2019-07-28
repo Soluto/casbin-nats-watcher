@@ -45,7 +45,7 @@ func NewWatcher(endpoint string, policyUpdatedSubject string, options ...nats.Op
 	}
 	nw.subscription = sub
 
-	runtime.SetFinalizer(nw, finilizer)
+	runtime.SetFinalizer(nw, finalizer)
 
 	return nw, nil
 }
@@ -75,6 +75,13 @@ func (w *Watcher) connect() error {
 	return nil
 }
 
+// Close stops and releases the watcher, the callback function will not be called any more.
+func (w *Watcher) Close() {
+	if w.subscription != nil && w.subscription.IsValid() {
+		w.subscription.Unsubscribe()
+	}
+}
+
 func (w *Watcher) subcribeToUpdates() (*nats.Subscription, error) {
 	sub, err := w.connection.Subscribe(w.policyUpdatedSubject, func(msg *nats.Msg) {
 		if w.callback != nil {
@@ -87,7 +94,7 @@ func (w *Watcher) subcribeToUpdates() (*nats.Subscription, error) {
 	return sub, nil
 }
 
-func finilizer(w *Watcher) {
+func finalizer(w *Watcher) {
 	if w.subscription != nil && w.subscription.IsValid() {
 		w.subscription.Unsubscribe()
 	}
