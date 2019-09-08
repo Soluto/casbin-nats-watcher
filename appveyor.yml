@@ -1,0 +1,19 @@
+version: 0.0.{build}
+
+platform: x64
+
+clone_folder: c:\gopath\src\github.com\Soluto\casbin-nats-watcher
+
+environment:
+  GOPATH: c:\gopath
+
+install:
+  - echo %PATH%
+  - echo %GOPATH%
+  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+  - go version
+  - go env
+  - go get -v -t -d ./...
+
+build_script:
+  - go test -v -race ./...
